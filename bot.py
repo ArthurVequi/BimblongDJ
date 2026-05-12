@@ -3,13 +3,18 @@ from discord.ext import commands
 import yt_dlp
 import google.generativeai as genai
 import os
+import re
 from dotenv import load_dotenv
 import asyncio
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 
 # Carrega variáveis de ambiente
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 
 # Configura o Gemini (IA)
 if GEMINI_API_KEY and GEMINI_API_KEY != 'sua_chave_aqui':
@@ -18,6 +23,19 @@ if GEMINI_API_KEY and GEMINI_API_KEY != 'sua_chave_aqui':
     model = genai.GenerativeModel('gemini-2.5-flash')
 else:
     model = None
+
+# Configura o Spotify
+if SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET and SPOTIFY_CLIENT_ID != 'seu_client_id_aqui':
+    try:
+        sp_credentials = SpotifyClientCredentials(client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET)
+        sp = spotipy.Spotify(client_credentials_manager=sp_credentials)
+        print('✅ Spotify configurado com sucesso!')
+    except Exception as e:
+        sp = None
+        print(f'⚠️ Erro ao configurar Spotify: {e}')
+else:
+    sp = None
+    print('⚠️ Spotify não configurado. Adicione SPOTIFY_CLIENT_ID e SPOTIFY_CLIENT_SECRET no .env para usar links do Spotify.')
 
 # Configura o Bot com o prefixo !
 intents = discord.Intents.default()
@@ -82,6 +100,78 @@ def get_state(guild_id):
         music_states[guild_id] = MusicState()
     return music_states[guild_id]
 
+def is_spotify_url(url):
+    """Verifica se a URL é do Spotify."""
+    return bool(re.match(r'https?://open\.spotify\.com/(?:intl-[a-z]{2}/)?(track|playlist|album)/', url))
+
+async def get_spotify_tracks(url):
+    """Extrai nomes de músicas de um link do Spotify (track, playlist ou álbum)."""
+    if not sp:
+        return None, 'Spotify não está configurado. Adicione suas credenciais no arquivo `.env`.'
+    
+    try:
+        # Extrai o tipo e ID do link
+        match = re.match(r'https?://open\.spotify\.com/(?:intl-[a-z]{2}/)?(track|playlist|album)/([a-zA-Z0-9]+)', url)
+        if not match:
+            return None, 'Link do Spotify inválido.'
+        
+        link_type = match.group(1)
+        spotify_id = match.group(2)
+        tracks = []
+        
+        if link_type == 'track':
+            track = sp.track(spotify_id)
+            artist = track['artists'][0]['name']
+            name = track['name']
+            tracks.append(f"{artist} - {name}")
+        
+        elif link_type == 'playlist':
+            results = sp.playlist_tracks(spotify_id)
+            for item in results['items']:
+                track = item.get('track')
+                if track:
+                    artist = track['artists'][0]['name']
+                    name = track['name']
+                    tracks.append(f"{artist} - {name}")
+            # Paginação: playlists grandes têm mais de 100 músicas
+            while results['next']:
+                results = sp.next(results)
+                for item in results['items']:
+                    track = item.get('track')
+                    if track:
+                        artist = track['artists'][0]['name']
+                        name = track['name']
+                        tracks.append(f"{artist} - {name}")
+        
+        elif link_type == 'album':
+            results = sp.album_tracks(spotify_id)
+            album_info = sp.album(spotify_id)
+            for track in results['items']:
+                artist = track['artists'][0]['name']
+                name = track['name']
+                tracks.append(f"{artist} - {name}")
+        
+        if not tracks:
+            return None, 'Não encontrei músicas nesse link do Spotify.'
+        
+        return tracks, None
+    except Exception as e:
+        return None, f'Erro ao acessar o Spotify: {e}'
+
+async def search_youtube(query):
+    """Busca uma música no YouTube pelo nome e retorna (url, title) ou None."""
+    try:
+        loop = asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(f"ytsearch:{query}", download=False))
+        if 'entries' in data and len(data['entries']) > 0:
+            info = data['entries'][0]
+            video_url = info.get('webpage_url') or info.get('url')
+            title = info.get('title')
+            return (video_url, title)
+    except:
+        pass
+    return None
+
 async def play_next(ctx):
     state = get_state(ctx.guild.id)
     if len(state.queue) > 0:
@@ -137,14 +227,42 @@ async def tocar(ctx, *, url):
     
     async with ctx.typing():
         try:
-            # Se for um link direto, não usa ytsearch
+            # Verifica se é um link do Spotify
+            if is_spotify_url(url):
+                tracks, error = await get_spotify_tracks(url)
+                if error:
+                    await ctx.send(f'❌ {error}')
+                    return
+                
+                await ctx.send(f'<:spotify:🟢> Encontradas **{len(tracks)}** música(s) do Spotify. Buscando no YouTube...')
+                
+                added = 0
+                for track_name in tracks:
+                    result = await search_youtube(track_name)
+                    if result:
+                        state.queue.append(result)
+                        added += 1
+                
+                await ctx.send(f'✅ **{added}/{len(tracks)}** músicas adicionadas à fila!')
+                
+                if not ctx.voice_client.is_playing() and not ctx.voice_client.is_paused():
+                    await play_next(ctx)
+                return
+            
+            # Se for um link direto (YouTube, etc.), não usa ytsearch
             search_query = url if url.startswith('http') else f"ytsearch:{url}"
             
             loop = asyncio.get_event_loop()
             data = await loop.run_in_executor(None, lambda: ytdl.extract_info(search_query, download=False))
             
-            if 'entries' in data and len(data['entries']) > 0:
-                info = data['entries'][0]
+            # Link direto: yt-dlp retorna o vídeo sem a chave 'entries'
+            # Pesquisa por nome: retorna uma lista em 'entries'
+            if 'entries' in data:
+                info = data['entries'][0] if len(data['entries']) > 0 else None
+            else:
+                info = data  # É um link direto, o resultado já é o vídeo
+
+            if info:
                 video_url = info.get('webpage_url') or info.get('url')
                 title = info.get('title')
                 
@@ -297,7 +415,7 @@ async def help_command(ctx):
     
     # Lista de comandos com descrições
     commands_list = [
-        ("!tocar <nome/link>", "Toca uma música do YouTube (alias: !play, !p)"),
+        ("!tocar <nome/link>", "Toca uma música do YouTube ou Spotify (alias: !play, !p)"),
         ("!ia <descrição>", "A IA descobre a música para você. Ex: !ia musica triste do shrek"),
         ("!pausar", "Pausa a música atual (alias: !pause)"),
         ("!retomar", "Retoma a música pausada (alias: !resume)"),

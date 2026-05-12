@@ -2,3 +2,4 @@ discord.py[voice]
 yt-dlp
 google-generativeai
 python-dotenv
+spotipy
