@@ -2,7 +2,7 @@
 
 Um bot de música avançado para o Discord construído em Python. O **BimblongDJ** suporta reprodução de áudio diretamente do YouTube e Spotify, além de contar com uma integração com Inteligência Artificial (Google Gemini) para encontrar a música certa a partir de uma descrição que você der!
 
-## Funcionalidades
+## ✨ Funcionalidades
 
 - **YouTube & Spotify:** Toca músicas usando o nome, links diretos do YouTube ou links do Spotify (faixa, álbum ou playlist).
 - **Busca por IA:** Não lembra o nome da música? Use a IA para descrever a música (ex: "*aquela música triste do filme do Shrek*") e o bot acha ela para você!
@@ -10,7 +10,7 @@ Um bot de música avançado para o Discord construído em Python. O **BimblongDJ
 - **Controles de Reprodução:** Pausar, retomar, avançar, voltar e limpar fila.
 - **Arquitetura Modular:** Código limpo e moderno utilizando `Cogs` e divisão em pacotes lógicos (serviços, música e comandos).
 
-## Tecnologias Utilizadas
+## ⚒️ Tecnologias Utilizadas
 
 - [Python 3.10+](https://www.python.org/)
 - [discord.py](https://discordpy.readthedocs.io/) - Interação com a API do Discord.
@@ -19,7 +19,7 @@ Um bot de música avançado para o Discord construído em Python. O **BimblongDJ
 - [Spotipy](https://spotipy.readthedocs.io/) - Integração com a API do Spotify.
 - [Google Generative AI](https://ai.google.dev/) - Inteligência Artificial para a busca por prompt.
 
-## Como instalar e rodar localmente
+## 💻 Como instalar e rodar localmente
 
 ### 1. Pré-requisitos
 Você vai precisar ter instalado no seu PC:
@@ -54,7 +54,7 @@ Com tudo configurado, basta rodar o arquivo principal:
 python bot.py
 ```
 
-## Comandos Disponíveis
+## 📋 Comandos Disponíveis
 
 O prefixo padrão do bot é `!`
 
