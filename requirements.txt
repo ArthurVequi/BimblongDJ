@@ -1,3 +1,5 @@
+# Arquivo .txt para instalação das bibliotecas necessárias
+
 discord.py[voice]
 yt-dlp
 google-generativeai
