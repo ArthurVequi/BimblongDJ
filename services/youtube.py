@@ -16,13 +16,19 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0'
+    'source_address': '0.0.0.0',
+    # Melhoria: Priorizar codecs de áudio melhores (como opus)
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'opus',
+        'preferredquality': '192',
+    }],
 }
 
-# FFmpeg: reconecta automaticamente se a stream cair, e ignora vídeo (-vn = só áudio)
+# FFmpeg: otimizado para streaming de alta qualidade, reconexão rápida e normalização de áudio
 ffmpeg_options = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn'
+    'options': '-vn -filter:a "loudnorm=I=-16:TP=-1.5:LRA=11" -b:a 192k'
 }
 
 ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
@@ -32,7 +38,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
     # Transforma uma URL em fonte de áudio pro Discord.
     # Herda de PCMVolumeTransformer para permitir controle de volume.
 
-    def __init__(self, source, *, data, volume=0.5):
+    def __init__(self, source, *, data, volume=1.0):
         super().__init__(source, volume)
         self.data = data
         self.title = data.get('title')
