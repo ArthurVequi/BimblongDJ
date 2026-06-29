@@ -44,6 +44,9 @@ ytdl_format_options = {
         'preferredquality': '192',
     }],
     'remote_components': {'ejs:github'},
+    'js_runtimes': {
+        'node': {}
+    },
 }
 
 if os.path.exists('cookies.txt'):
