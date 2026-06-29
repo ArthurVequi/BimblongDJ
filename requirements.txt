@@ -2,6 +2,7 @@
 
 discord.py[voice]
 yt-dlp[default]
+yt-dlp-ejs
 google-generativeai
 python-dotenv
 spotipy

@@ -43,6 +43,7 @@ ytdl_format_options = {
         'preferredcodec': 'opus',
         'preferredquality': '192',
     }],
+    'remote_components': {'ejs:github'},
 }
 
 if os.path.exists('cookies.txt'):
