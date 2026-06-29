@@ -1,10 +1,19 @@
 import discord
 import asyncio
 import yt_dlp
+import os
 
+# Se houver cookies do YouTube nas variáveis de ambiente, salva em um arquivo local
+youtube_cookies = os.getenv('YOUTUBE_COOKIES')
+if youtube_cookies:
+    try:
+        with open('cookies.txt', 'w', encoding='utf-8') as f:
+            f.write(youtube_cookies)
+        print("✅ Cookies do YouTube carregados com sucesso das variáveis de ambiente.")
+    except Exception as e:
+        print(f"⚠️ Erro ao salvar cookies do YouTube: {e}")
 
 # yt-dlp: Biblioteca busca o melhor áudio disponível, sem baixar playlists inteiras
-
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
@@ -30,6 +39,8 @@ ytdl_format_options = {
     },
 }
 
+if os.path.exists('cookies.txt'):
+    ytdl_format_options['cookiefile'] = 'cookies.txt'
 
 # FFmpeg: otimizado para streaming de alta qualidade, reconexão rápida e normalização de áudio
 ffmpeg_options = {
@@ -38,6 +49,7 @@ ffmpeg_options = {
 }
 
 ytdl = yt_dlp.YoutubeDL(ytdl_format_options)
+
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
