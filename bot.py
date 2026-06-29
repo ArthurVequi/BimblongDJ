@@ -1,3 +1,8 @@
+import sys
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 import discord
 from discord.ext import commands
 from config import DISCORD_TOKEN
