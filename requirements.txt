@@ -1,7 +1,7 @@
 # Arquivo .txt para instalação das bibliotecas necessárias
 
 discord.py[voice]
-yt-dlp[default] @ git+https://github.com/yt-dlp/yt-dlp.git@master
+yt-dlp[default]
 google-generativeai
 python-dotenv
 spotipy
