@@ -2,9 +2,12 @@ FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
 
-# Instala ffmpeg, nodejs e git (necessários para o yt-dlp decifrar o n-challenge e instalar via git)
+# Copia o binário do Deno (JavaScript runtime recomendado para o yt-dlp resolver os desafios do YouTube)
+COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+
+# Instala o ffmpeg (necessário para áudio do Discord)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg nodejs git && \
+    apt-get install -y --no-install-recommends ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

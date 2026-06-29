@@ -17,12 +17,12 @@ if youtube_cookies:
     except Exception as e:
         print(f"⚠️ Erro ao salvar cookies do YouTube: {e}")
 
-# Verifica se o Node.js está presente no sistema
-node_path = shutil.which('node')
-if node_path:
-    print(f"✅ Node.js encontrado no path: {node_path}")
+# Verifica se o Deno está presente no sistema (runtime JS recomendado pelo yt-dlp)
+deno_path = shutil.which('deno')
+if deno_path:
+    print(f"✅ Deno encontrado no path: {deno_path}")
 else:
-    print("⚠️ Node.js NÃO encontrado no path! Desafios de JS do YouTube podem falhar.")
+    print("⚠️ Deno NÃO encontrado no path! Desafios de JS do YouTube podem falhar.")
 
 # yt-dlp: Biblioteca busca o melhor áudio disponível, sem baixar playlists inteiras
 ytdl_format_options = {
@@ -44,9 +44,6 @@ ytdl_format_options = {
         'preferredquality': '192',
     }],
     'remote_components': {'ejs:github'},
-    'js_runtimes': {
-        'node': {}
-    },
 }
 
 if os.path.exists('cookies.txt'):
