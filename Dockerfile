@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-# Instala o ffmpeg (necessário para áudio do Discord)
+# Instala ffmpeg e nodejs (nodejs é exigido pelo yt-dlp para resolver verificações do YouTube)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg nodejs && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
