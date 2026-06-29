@@ -3,15 +3,26 @@ import asyncio
 import yt_dlp
 import os
 
+import shutil
+
 # Se houver cookies do YouTube nas variáveis de ambiente, salva em um arquivo local
 youtube_cookies = os.getenv('YOUTUBE_COOKIES')
 if youtube_cookies:
     try:
+        # Garante que limpa o caractere carriage return do windows
+        youtube_cookies = youtube_cookies.replace('\r\n', '\n')
         with open('cookies.txt', 'w', encoding='utf-8') as f:
             f.write(youtube_cookies)
-        print("✅ Cookies do YouTube carregados com sucesso das variáveis de ambiente.")
+        print(f"✅ Cookies do YouTube carregados das variáveis de ambiente ({len(youtube_cookies)} bytes).")
     except Exception as e:
         print(f"⚠️ Erro ao salvar cookies do YouTube: {e}")
+
+# Verifica se o Node.js está presente no sistema
+node_path = shutil.which('node')
+if node_path:
+    print(f"✅ Node.js encontrado no path: {node_path}")
+else:
+    print("⚠️ Node.js NÃO encontrado no path! Desafios de JS do YouTube podem falhar.")
 
 # yt-dlp: Biblioteca busca o melhor áudio disponível, sem baixar playlists inteiras
 ytdl_format_options = {
@@ -21,9 +32,9 @@ ytdl_format_options = {
     'noplaylist': True,
     'nocheckcertificate': True,
     'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
+    'logtostderr': True,
+    'quiet': False,
+    'no_warnings': False,
     'default_search': 'auto',
     'source_address': '0.0.0.0',
     # Melhoria: Priorizar codecs de áudio melhores (como opus)
@@ -36,6 +47,9 @@ ytdl_format_options = {
 
 if os.path.exists('cookies.txt'):
     ytdl_format_options['cookiefile'] = 'cookies.txt'
+    print("🍪 ytdl_format_options configurado com cookiefile='cookies.txt'")
+else:
+    print("🍪 ytdl_format_options NÃO está usando arquivo de cookies.")
 
 # FFmpeg: otimizado para streaming de alta qualidade, reconexão rápida e normalização de áudio
 ffmpeg_options = {
