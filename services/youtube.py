@@ -32,11 +32,6 @@ ytdl_format_options = {
         'preferredcodec': 'opus',
         'preferredquality': '192',
     }],
-    'extractor_args': {
-        'youtube': {
-            'player_client': ['android', 'web_embedded']
-        }
-    },
 }
 
 if os.path.exists('cookies.txt'):
