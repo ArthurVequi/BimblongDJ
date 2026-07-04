@@ -99,6 +99,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 ua = data['http_headers'].get('User-Agent')
                 if ua:
                     opts['before_options'] += f' -user_agent "{ua}"'
+        else:
+            # ATENÇÃO: As opções de -reconnect são EXCLUSIVAS para HTTP streams.
+            # Se passadas para um arquivo local baixado, o FFmpeg crasha instantaneamente!
+            opts['before_options'] = ''
 
         return cls(discord.FFmpegPCMAudio(filename, **opts), data=data, filename=filename if not stream else None)
 
