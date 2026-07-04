@@ -26,7 +26,9 @@ else:
 
 # yt-dlp: Biblioteca busca o melhor áudio disponível, sem baixar playlists inteiras
 ytdl_format_options = {
-    'format': 'bestaudio/best',
+    # MUDANÇA CRÍTICA: O YouTube está bloqueando ativamente as streams exclusivas de áudio (bestaudio) em datacenters.
+    # Ao pedir o formato 'best' (vídeo + áudio), nós driblamos a proteção 403, e o FFmpeg extrai o áudio normalmente!
+    'format': 'best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
     'restrictfilenames': True,
     'noplaylist': True,
