@@ -39,12 +39,6 @@ ytdl_format_options = {
     'no_warnings': False,
     'default_search': 'auto',
     'source_address': '0.0.0.0',
-    # Melhoria: Priorizar codecs de áudio melhores (como opus)
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'opus',
-        'preferredquality': '192',
-    }],
     'remote_components': {'ejs:github'},
     # Remove clientes defeituosos que causam 403 e força o default
     'extractor_args': {'youtube': {'player_client': ['default', '-android_sdkless']}},
