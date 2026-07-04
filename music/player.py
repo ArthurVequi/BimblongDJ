@@ -13,13 +13,26 @@ async def play_next(ctx):
 
         async with ctx.typing():
             try:
-                # Stream em tempo real, não baixa o arquivo inteiro
-                player = await YTDLSource.from_url(url, loop=ctx.bot.loop, stream=True)
+                # Usa stream=False para que o yt-dlp baixe a música. 
+                # Isso resolve definitivamente todos os erros 403 (Forbidden) e problemas de buffering.
+                await ctx.send(f'⏳ Baixando áudio, aguarde um segundo...')
+                player = await YTDLSource.from_url(url, loop=ctx.bot.loop, stream=False)
 
                 # Callback executado quando a música termina — agenda play_next de forma thread-safe
                 def after_playing(e):
                     if e:
                         print(f'Erro no player: {e}')
+                    
+                    # Deleta o arquivo baixado para não encher o disco do servidor
+                    if hasattr(player, 'filename') and player.filename:
+                        try:
+                            import os
+                            if os.path.exists(player.filename):
+                                os.remove(player.filename)
+                                print(f"Arquivo deletado: {player.filename}")
+                        except Exception as del_err:
+                            print(f"Erro ao deletar {player.filename}: {del_err}")
+
                     coro = play_next(ctx)
                     fut = asyncio.run_coroutine_threadsafe(coro, ctx.bot.loop)
                     try:

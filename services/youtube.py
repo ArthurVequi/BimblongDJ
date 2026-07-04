@@ -71,11 +71,12 @@ class YTDLSource(discord.PCMVolumeTransformer):
     # Transforma uma URL em fonte de áudio pro Discord.
     # Herda de PCMVolumeTransformer para permitir controle de volume.
 
-    def __init__(self, source, *, data, volume=1.0):
+    def __init__(self, source, *, data, volume=1.0, filename=None):
         super().__init__(source, volume)
         self.data = data
         self.title = data.get('title')
         self.url = data.get('url')
+        self.filename = filename
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
@@ -102,7 +103,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 if ua:
                     opts['before_options'] += f' -user_agent "{ua}"'
 
-        return cls(discord.FFmpegPCMAudio(filename, **opts), data=data)
+        return cls(discord.FFmpegPCMAudio(filename, **opts), data=data, filename=filename if not stream else None)
 
 
 async def search_youtube(query):
