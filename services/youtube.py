@@ -46,7 +46,6 @@ ytdl_format_options = {
     'remote_components': {'ejs:github'},
     # Remove clientes defeituosos que causam 403 e força o default
     'extractor_args': {'youtube': {'player_client': ['default', '-android_sdkless']}},
-    'impersonate': 'chrome',
 }
 
 if os.getenv('YOUTUBE_BROWSER'):
