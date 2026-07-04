@@ -88,7 +88,21 @@ class YTDLSource(discord.PCMVolumeTransformer):
             data = data['entries'][0]
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+        # Copia as opções globais do ffmpeg para não modificar o dicionário original
+        opts = ffmpeg_options.copy()
+
+        # Passa o arquivo de cookies e o User-Agent pro ffmpeg, essencial para evitar o Erro 403 Forbidden do YouTube
+        if stream:
+            if os.path.exists('cookies.txt'):
+                opts['before_options'] += ' -cookies "cookies.txt"'
+            
+            if 'http_headers' in data:
+                ua = data['http_headers'].get('User-Agent')
+                if ua:
+                    opts['before_options'] += f' -user_agent "{ua}"'
+
+        return cls(discord.FFmpegPCMAudio(filename, **opts), data=data)
 
 
 async def search_youtube(query):
