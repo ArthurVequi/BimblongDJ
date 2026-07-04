@@ -44,13 +44,18 @@ ytdl_format_options = {
         'preferredquality': '192',
     }],
     'remote_components': {'ejs:github'},
+    'extractor_args': {'youtube': {'client': ['android', 'web']}},
 }
 
-if os.path.exists('cookies.txt'):
+if os.getenv('YOUTUBE_BROWSER'):
+    browser = os.getenv('YOUTUBE_BROWSER')
+    ytdl_format_options['cookiesfrombrowser'] = (browser,)
+    print(f"🍪 ytdl_format_options configurado com cookiesfrombrowser='{browser}'")
+elif os.path.exists('cookies.txt'):
     ytdl_format_options['cookiefile'] = 'cookies.txt'
     print("🍪 ytdl_format_options configurado com cookiefile='cookies.txt'")
 else:
-    print("🍪 ytdl_format_options NÃO está usando arquivo de cookies.")
+    print("🍪 ytdl_format_options NÃO está usando arquivo de cookies e nem cookies do navegador.")
 
 # FFmpeg: otimizado para streaming de alta qualidade, reconexão rápida e normalização de áudio
 ffmpeg_options = {
