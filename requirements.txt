@@ -1,7 +1,7 @@
 # Arquivo .txt para instalação das bibliotecas necessárias
 
 discord.py[voice]
-yt-dlp[default]
+yt-dlp[default]>=2026.6.9
 yt-dlp-ejs
 google-generativeai
 python-dotenv
