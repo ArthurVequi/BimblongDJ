@@ -40,8 +40,8 @@ ytdl_format_options = {
     'default_search': 'auto',
     'source_address': '0.0.0.0',
     'remote_components': {'ejs:github'},
-    # Remove clientes defeituosos que causam 403 e força o default
-    'extractor_args': {'youtube': {'player_client': ['default', '-android_sdkless']}},
+    # Clientes recomendados pela comunidade para contornar o bloqueio de VEVO/Music (jul/2026)
+    'extractor_args': {'youtube': {'player_client': ['web_embedded', 'web', 'tv']}},
 }
 
 if os.getenv('YOUTUBE_BROWSER'):
